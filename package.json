@@ -9,6 +9,7 @@
     "dev:electron": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
     "build": "tsc && vite build",
     "build:electron": "npm run build && electron-builder",
+    "build:win": "npm run build && electron-builder --win",
     "preview": "vite preview",
     "postinstall": "electron-builder install-app-deps"
   },

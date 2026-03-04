@@ -13,6 +13,10 @@ let mainWindow: BrowserWindow | null = null;
 const VITE_DEV_SERVER_URL = process.env.VITE_DEV_SERVER_URL;
 
 function createWindow() {
+  const iconPath = VITE_DEV_SERVER_URL
+    ? path.join(__dirname, '../public/icon.png')
+    : path.join(__dirname, '../dist/icon.png');
+
   mainWindow = new BrowserWindow({
     width: 1100,
     height: 700,
@@ -25,6 +29,7 @@ function createWindow() {
       sandbox: false,
     },
     title: 'Fast & Focus',
+    icon: iconPath,
   });
 
   if (VITE_DEV_SERVER_URL) {
@@ -65,6 +70,13 @@ app.whenReady().then(() => {
   }));
 
   createWindow();
+
+  if (process.platform === 'darwin') {
+    const iconPath = VITE_DEV_SERVER_URL
+      ? path.join(__dirname, '../public/icon.png')
+      : path.join(__dirname, '../dist/icon.png');
+    app.dock.setIcon(iconPath);
+  }
 });
 
 app.on('window-all-closed', () => {
