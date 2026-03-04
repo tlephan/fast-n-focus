@@ -6,8 +6,6 @@ import { cn } from '../lib/utils';
 import { useAppInfo } from '../hooks';
 import api from '../api';
 
-const DEFAULT_TAGLINE = 'Get today done, be focused and no excuses';
-
 type FontSize = 'small' | 'medium' | 'large';
 type Theme = 'light' | 'dark' | 'system';
 
@@ -18,8 +16,6 @@ interface SettingsDialogProps {
   onThemeChange: (value: Theme) => void;
   fontSize: FontSize;
   onFontSizeChange: (value: FontSize) => void;
-  tagline: string;
-  onTaglineChange: (value: string) => void;
   expirationDays: number;
   onExpirationDaysChange: (value: number) => void;
 }
@@ -31,8 +27,6 @@ export function SettingsDialog({
   onThemeChange,
   fontSize,
   onFontSizeChange,
-  tagline,
-  onTaglineChange,
   expirationDays,
   onExpirationDaysChange,
 }: SettingsDialogProps) {
@@ -136,30 +130,6 @@ export function SettingsDialog({
               </div>
             </div>
           </div>
-
-          {/* Tagline — disabled
-          <div className="border-b pb-5">
-            <p className="text-sm font-medium mb-1.5">Tagline</p>
-            <p className="text-xs text-muted-foreground mb-2">
-              Subtitle shown in the app header
-            </p>
-            <input
-              type="text"
-              value={tagline}
-              onChange={(e) => onTaglineChange(e.target.value)}
-              placeholder={DEFAULT_TAGLINE}
-              className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
-            />
-            {tagline !== DEFAULT_TAGLINE && (
-              <button
-                onClick={() => onTaglineChange(DEFAULT_TAGLINE)}
-                className="mt-1.5 text-xs text-muted-foreground hover:text-foreground"
-              >
-                Reset to default
-              </button>
-            )}
-          </div>
-          */}
 
           {/* Expiration */}
           <div className="border-b pb-5">

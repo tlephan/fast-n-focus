@@ -6,7 +6,7 @@ import { BoardColumn } from './components/BoardColumn';
 import { TaskDialog } from './components/TaskDialog';
 import { LinkTaskDialog } from './components/LinkTaskDialog';
 import { SettingsDialog } from './components/SettingsDialog';
-import { Search, Plus, Settings, GripVertical, Zap } from 'lucide-react';
+import { Search, Plus, Settings, GripVertical } from 'lucide-react';
 import type { Task } from './types';
 import {
   DndContext,
@@ -25,8 +25,6 @@ type FilterType = 'all' | 'pending' | 'done';
 type FontSize = 'small' | 'medium' | 'large';
 type Theme = 'light' | 'dark' | 'system';
 
-const DEFAULT_TAGLINE = 'Get today done, be focused and no excuses';
-
 export default function App() {
   const [filter, setFilter] = useState<FilterType>('all');
 
@@ -36,10 +34,6 @@ export default function App() {
 
   const [fontSize, setFontSize] = useState<FontSize>(() =>
     (localStorage.getItem('font-size') as FontSize) || 'medium'
-  );
-
-  const [tagline, setTagline] = useState(() =>
-    localStorage.getItem('tagline') ?? DEFAULT_TAGLINE
   );
 
   const [expirationDays, setExpirationDays] = useState<number>(() =>
@@ -65,10 +59,6 @@ export default function App() {
     document.documentElement.style.fontSize = sizes[fontSize];
     localStorage.setItem('font-size', fontSize);
   }, [fontSize]);
-
-  useEffect(() => {
-    localStorage.setItem('tagline', tagline);
-  }, [tagline]);
 
   useEffect(() => {
     localStorage.setItem('expiration-days', String(expirationDays));
@@ -247,10 +237,6 @@ export default function App() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <h1 className="text-lg font-bold text-foreground">Fast & Focus</h1>
-            <span className="hidden items-center gap-1.5 rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-3.5 py-1 text-xs font-normal text-white shadow-md shadow-orange-500/40 sm:inline-flex">
-              <Zap className="h-3 w-3 fill-white" />
-              {tagline}
-            </span>
           </div>
           <div className="flex items-center gap-2">
             {/* Search */}
@@ -360,8 +346,6 @@ export default function App() {
         onThemeChange={setTheme}
         fontSize={fontSize}
         onFontSizeChange={setFontSize}
-        tagline={tagline}
-        onTaglineChange={setTagline}
         expirationDays={expirationDays}
         onExpirationDaysChange={setExpirationDays}
       />
