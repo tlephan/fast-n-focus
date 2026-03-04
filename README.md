@@ -1,8 +1,6 @@
 # Fast & Focus - Minimal Task Manager
 
-> A fast, minimal task manager for macOS, Windows, and Linux. Add tasks, get them done.
-
-*"Get today tasks done — Focus — No excuse"*
+> A fast, secure, minimal task manager app for desktop (macOS, Windows, Linux). Add tasks - get them done.
 
 ![Demo Screenshot](screenshot.png)
 
