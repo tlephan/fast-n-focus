@@ -1,8 +1,12 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { initDatabase, getDb } from './database';
 import { registerTaskHandlers } from './ipc/tasks';
 import { registerTaskLinkHandlers } from './ipc/taskLinks';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -19,7 +23,7 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
     },
-    title: 'FastnFocus',
+    title: 'Fast & Focus',
   });
 
   if (VITE_DEV_SERVER_URL) {

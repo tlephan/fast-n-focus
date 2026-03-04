@@ -1,13 +1,13 @@
 {
   "name": "fast-n-focus",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "A fast, minimal task manager for macOS, Windows, and Web",
   "type": "module",
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "vite",
     "dev:electron": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
-    "build": "tsc && vite build && tsc -p tsconfig.electron.json",
+    "build": "tsc && vite build",
     "build:electron": "npm run build && electron-builder",
     "preview": "vite preview",
     "postinstall": "electron-builder install-app-deps"

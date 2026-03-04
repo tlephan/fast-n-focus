@@ -1,4 +1,4 @@
-# FastnFocus
+# Fast & Focus - Minimal Task Manager
 
 > A fast, minimal task manager for macOS, Windows, and Web. Add tasks, get them done.
 

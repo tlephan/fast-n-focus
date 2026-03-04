@@ -15,7 +15,7 @@ export function AboutDialog({ open, onClose }: AboutDialogProps) {
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
       <div className="relative z-10 w-full max-w-sm rounded-lg border bg-card p-6 shadow-xl">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">About FastnFocus</h2>
+          <h2 className="text-lg font-semibold">About Fast & Focus</h2>
           <button
             onClick={onClose}
             className="rounded p-1 text-muted-foreground hover:bg-secondary hover:text-foreground"

@@ -1,16 +1,25 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTasks, useSearchTasks } from './hooks';
 import { BoardColumn } from './components/BoardColumn';
 import { TaskDialog } from './components/TaskDialog';
 import { LinkTaskDialog } from './components/LinkTaskDialog';
 import { AboutDialog } from './components/AboutDialog';
-import { Search, Plus, Info } from 'lucide-react';
+import { Search, Plus, Info, Sun, Moon } from 'lucide-react';
 import type { Task } from './types';
 
 type FilterType = 'all' | 'pending' | 'done';
 
 export default function App() {
   const [filter, setFilter] = useState<FilterType>('all');
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem('theme');
+    return saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', darkMode);
+    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+  }, [darkMode]);
   const [searchQuery, setSearchQuery] = useState('');
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -65,7 +74,7 @@ export default function App() {
       <header className="border-b bg-card px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <h1 className="text-lg font-bold text-foreground">FastnFocus</h1>
+            <h1 className="text-lg font-bold text-foreground">Fast & Focus</h1>
             <span className="hidden text-xs text-muted-foreground sm:inline">
               "Get tasks done in under 2 weeks - Focus - No excuse"
             </span>
@@ -101,6 +110,15 @@ export default function App() {
             >
               <Plus className="h-4 w-4" />
               Add Task
+            </button>
+
+            {/* Dark mode toggle */}
+            <button
+              onClick={() => setDarkMode((d) => !d)}
+              className="flex h-8 w-8 items-center justify-center rounded-md border hover:bg-secondary"
+              title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
 
             {/* About */}
