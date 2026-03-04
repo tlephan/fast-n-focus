@@ -3,7 +3,7 @@ import { Sun, Moon, Monitor } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAppInfo } from '../hooks';
 
-const DEFAULT_TAGLINE = 'Get today tasks done - Focus - No excuses';
+const DEFAULT_TAGLINE = 'Get today done, be focused and no excuses';
 
 type FontSize = 'small' | 'medium' | 'large';
 type Theme = 'light' | 'dark' | 'system';

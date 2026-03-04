@@ -25,7 +25,7 @@ type FilterType = 'all' | 'pending' | 'done';
 type FontSize = 'small' | 'medium' | 'large';
 type Theme = 'light' | 'dark' | 'system';
 
-const DEFAULT_TAGLINE = 'Get today tasks done - Focus - No excuses';
+const DEFAULT_TAGLINE = 'Get today done, be focused and no excuses';
 
 export default function App() {
   const [filter, setFilter] = useState<FilterType>('all');
