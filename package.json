@@ -1,6 +1,6 @@
 {
   "name": "fast-n-focus",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A fast, minimal task manager for macOS, Windows, and Linux",
   "type": "module",
   "main": "dist-electron/main.js",
