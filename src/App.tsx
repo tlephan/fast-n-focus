@@ -247,7 +247,7 @@ export default function App() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <h1 className="text-lg font-bold text-foreground">Fast & Focus</h1>
-            <span className="hidden items-center gap-1.5 rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-3.5 py-1 text-xs font-semibold text-white shadow-md shadow-orange-500/40 sm:inline-flex">
+            <span className="hidden items-center gap-1.5 rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-3.5 py-1 text-xs font-normal text-white shadow-md shadow-orange-500/40 sm:inline-flex">
               <Zap className="h-3 w-3 fill-white" />
               {tagline}
             </span>

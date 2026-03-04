@@ -44,10 +44,18 @@ export function BoardColumn({ title, boardId, tasks, filter, onEdit, onLinkTask 
   return (
     <div className="flex flex-1 flex-col">
       {/* Header */}
-      <div className="border-b px-4 py-2">
+      <div className="border-b px-4 py-2 flex items-center gap-2">
         <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
           {title}
         </h2>
+        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+          {pendingTasks.length}
+        </span>
+        {boardId === 'today' && (
+          <span className="ml-auto text-xs text-muted-foreground">
+            {new Date().toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+          </span>
+        )}
       </div>
 
       {/* Task List */}

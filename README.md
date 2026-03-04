@@ -4,6 +4,8 @@
 
 *"Get today tasks done — Focus — No excuse"*
 
+![Demo Screenshot](screenshot.png)
+
 ## Features
 
 - **Two boards** — Today (focused work) and Backlog (everything else)
