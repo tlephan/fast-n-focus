@@ -19,9 +19,10 @@ function createWindow() {
     minWidth: 800,
     minHeight: 500,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, 'preload.mjs'),
       contextIsolation: true,
       nodeIntegration: false,
+      sandbox: false,
     },
     title: 'Fast & Focus',
   });

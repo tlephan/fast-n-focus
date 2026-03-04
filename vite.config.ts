@@ -27,6 +27,11 @@ export default defineConfig({
         vite: {
           build: {
             outDir: 'dist-electron',
+            rollupOptions: {
+              output: {
+                entryFileNames: '[name].mjs',
+              },
+            },
           },
         },
       },

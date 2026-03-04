@@ -14,10 +14,12 @@ export function TaskDialog({ open, onClose, task }: TaskDialogProps) {
   const [priority, setPriority] = useState<'high' | 'medium' | 'low'>('medium');
   const [board, setBoard] = useState<'today' | 'backlog'>('backlog');
 
+  const [error, setError] = useState<string | null>(null);
   const createTask = useCreateTask();
   const updateTask = useUpdateTask();
 
   const isEditing = !!task;
+  const isPending = createTask.isPending || updateTask.isPending;
 
   useEffect(() => {
     if (task) {
@@ -36,16 +38,19 @@ export function TaskDialog({ open, onClose, task }: TaskDialogProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
+    setError(null);
+
+    const onError = (err: Error) => setError(err.message || 'Something went wrong');
 
     if (isEditing) {
       updateTask.mutate(
         { id: task.id, updates: { title: title.trim(), description: description.trim() || undefined, priority, board } },
-        { onSuccess: onClose }
+        { onSuccess: onClose, onError }
       );
     } else {
       createTask.mutate(
         { title: title.trim(), description: description.trim() || undefined, priority, board },
-        { onSuccess: onClose }
+        { onSuccess: onClose, onError }
       );
     }
   };
@@ -138,6 +143,11 @@ export function TaskDialog({ open, onClose, task }: TaskDialogProps) {
             </div>
           </div>
 
+          {/* Error */}
+          {error && (
+            <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>
+          )}
+
           {/* Actions */}
           <div className="flex justify-end gap-2 pt-2">
             <button
@@ -149,10 +159,10 @@ export function TaskDialog({ open, onClose, task }: TaskDialogProps) {
             </button>
             <button
               type="submit"
-              disabled={!title.trim()}
+              disabled={!title.trim() || isPending}
               className="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             >
-              {isEditing ? 'Save' : 'Add Task'}
+              {isPending ? 'Saving...' : isEditing ? 'Save' : 'Add Task'}
             </button>
           </div>
         </form>

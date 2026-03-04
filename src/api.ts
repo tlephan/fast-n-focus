@@ -28,25 +28,30 @@ declare global {
   }
 }
 
+const eAPI = () => {
+  if (!window.electronAPI) throw new Error('Electron API not available — is the preload loaded?');
+  return window.electronAPI;
+};
+
 const api = {
   tasks: {
-    getAll: (board?: string) => window.electronAPI.getTasks(board),
-    get: (id: string) => window.electronAPI.getTask(id),
-    create: (task: CreateTaskInput) => window.electronAPI.createTask(task),
-    update: (id: string, updates: UpdateTaskInput) => window.electronAPI.updateTask(id, updates),
-    delete: (id: string) => window.electronAPI.deleteTask(id),
-    toggle: (id: string) => window.electronAPI.toggleTask(id),
-    move: (id: string, board: string) => window.electronAPI.moveTask(id, board),
-    reorder: (id: string, newPosition: number) => window.electronAPI.reorderTask(id, newPosition),
-    search: (query: string) => window.electronAPI.searchTasks(query),
+    getAll: (board?: string) => eAPI().getTasks(board),
+    get: (id: string) => eAPI().getTask(id),
+    create: (task: CreateTaskInput) => eAPI().createTask(task),
+    update: (id: string, updates: UpdateTaskInput) => eAPI().updateTask(id, updates),
+    delete: (id: string) => eAPI().deleteTask(id),
+    toggle: (id: string) => eAPI().toggleTask(id),
+    move: (id: string, board: string) => eAPI().moveTask(id, board),
+    reorder: (id: string, newPosition: number) => eAPI().reorderTask(id, newPosition),
+    search: (query: string) => eAPI().searchTasks(query),
   },
   taskLinks: {
-    get: (taskId: string) => window.electronAPI.getTaskLinks(taskId),
-    create: (link: CreateTaskLinkInput) => window.electronAPI.createTaskLink(link),
-    delete: (id: string) => window.electronAPI.deleteTaskLink(id),
+    get: (taskId: string) => eAPI().getTaskLinks(taskId),
+    create: (link: CreateTaskLinkInput) => eAPI().createTaskLink(link),
+    delete: (id: string) => eAPI().deleteTaskLink(id),
   },
   app: {
-    getInfo: () => window.electronAPI.getAppInfo(),
+    getInfo: () => eAPI().getAppInfo(),
   },
 };
 
