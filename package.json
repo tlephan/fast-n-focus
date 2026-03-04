@@ -63,7 +63,7 @@
   },
   "build": {
     "appId": "com.fastnfocus.app",
-    "productName": "FastnFocus",
+    "productName": "fastnfocus",
     "directories": {
       "output": "release"
     },
