@@ -3,9 +3,8 @@ import { useTasks, useSearchTasks, useReorderTask, useUpdateTask } from './hooks
 import { BoardColumn } from './components/BoardColumn';
 import { TaskDialog } from './components/TaskDialog';
 import { LinkTaskDialog } from './components/LinkTaskDialog';
-import { AboutDialog } from './components/AboutDialog';
 import { SettingsDialog } from './components/SettingsDialog';
-import { Search, Plus, Info, Settings, GripVertical } from 'lucide-react';
+import { Search, Plus, Settings, GripVertical } from 'lucide-react';
 import type { Task } from './types';
 import {
   DndContext,
@@ -22,16 +21,16 @@ import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 
 type FilterType = 'all' | 'pending' | 'done';
 type FontSize = 'small' | 'medium' | 'large';
+type Theme = 'light' | 'dark' | 'system';
 
 const DEFAULT_TAGLINE = 'Get today tasks done - Focus - No excuses';
 
 export default function App() {
   const [filter, setFilter] = useState<FilterType>('all');
 
-  const [darkMode, setDarkMode] = useState(() => {
-    const saved = localStorage.getItem('theme');
-    return saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
-  });
+  const [theme, setTheme] = useState<Theme>(() =>
+    (localStorage.getItem('theme') as Theme) || 'system'
+  );
 
   const [fontSize, setFontSize] = useState<FontSize>(() =>
     (localStorage.getItem('font-size') as FontSize) || 'medium'
@@ -42,9 +41,18 @@ export default function App() {
   );
 
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', darkMode);
-    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
-  }, [darkMode]);
+    localStorage.setItem('theme', theme);
+
+    if (theme === 'system') {
+      const mq = window.matchMedia('(prefers-color-scheme: dark)');
+      const apply = (dark: boolean) => document.documentElement.classList.toggle('dark', dark);
+      apply(mq.matches);
+      mq.addEventListener('change', (e) => apply(e.matches));
+      return () => mq.removeEventListener('change', (e) => apply(e.matches));
+    } else {
+      document.documentElement.classList.toggle('dark', theme === 'dark');
+    }
+  }, [theme]);
 
   useEffect(() => {
     const sizes: Record<FontSize, string> = { small: '14px', medium: '16px', large: '18px' };
@@ -60,9 +68,8 @@ export default function App() {
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [linkingTask, setLinkingTask] = useState<Task | null>(null);
-  const [aboutOpen, setAboutOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [splitRatio, setSplitRatio] = useState(0.5);
+  const [splitRatio, setSplitRatio] = useState(0.6);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const isDraggingDivider = useRef(false);
   const mainRef = useRef<HTMLElement>(null);
@@ -268,14 +275,6 @@ export default function App() {
               <Settings className="h-4 w-4" />
             </button>
 
-            {/* About */}
-            <button
-              onClick={() => setAboutOpen(true)}
-              className="flex h-8 w-8 items-center justify-center rounded-md border hover:bg-secondary"
-              title="About"
-            >
-              <Info className="h-4 w-4" />
-            </button>
           </div>
         </div>
       </header>
@@ -335,12 +334,11 @@ export default function App() {
         onClose={() => setLinkingTask(null)}
         sourceTask={linkingTask}
       />
-      <AboutDialog open={aboutOpen} onClose={() => setAboutOpen(false)} />
       <SettingsDialog
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
-        darkMode={darkMode}
-        onDarkModeChange={setDarkMode}
+        theme={theme}
+        onThemeChange={setTheme}
         fontSize={fontSize}
         onFontSizeChange={setFontSize}
         tagline={tagline}

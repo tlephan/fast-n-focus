@@ -1,15 +1,18 @@
-import { Sun, Moon } from 'lucide-react';
+import type React from 'react';
+import { Sun, Moon, Monitor } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { useAppInfo } from '../hooks';
 
 const DEFAULT_TAGLINE = 'Get today tasks done - Focus - No excuses';
 
 type FontSize = 'small' | 'medium' | 'large';
+type Theme = 'light' | 'dark' | 'system';
 
 interface SettingsDialogProps {
   open: boolean;
   onClose: () => void;
-  darkMode: boolean;
-  onDarkModeChange: (value: boolean) => void;
+  theme: Theme;
+  onThemeChange: (value: Theme) => void;
   fontSize: FontSize;
   onFontSizeChange: (value: FontSize) => void;
   tagline: string;
@@ -19,13 +22,15 @@ interface SettingsDialogProps {
 export function SettingsDialog({
   open,
   onClose,
-  darkMode,
-  onDarkModeChange,
+  theme,
+  onThemeChange,
   fontSize,
   onFontSizeChange,
   tagline,
   onTaglineChange,
 }: SettingsDialogProps) {
+  const { data: appInfo } = useAppInfo();
+
   if (!open) return null;
 
   return (
@@ -44,22 +49,34 @@ export function SettingsDialog({
         </div>
 
         <div className="space-y-5">
-          {/* Dark mode */}
+          {/* Theme */}
           <div className="flex items-center justify-between border-b pb-5">
             <div>
-              <p className="text-sm font-medium">Dark mode</p>
-              <p className="text-xs text-muted-foreground">Toggle light and dark theme</p>
+              <p className="text-sm font-medium">Theme</p>
+              <p className="text-xs text-muted-foreground">Choose your preferred appearance</p>
             </div>
-            <button
-              onClick={() => onDarkModeChange(!darkMode)}
-              className={cn(
-                'flex h-8 w-8 items-center justify-center rounded-md border transition-colors',
-                darkMode ? 'bg-secondary' : 'hover:bg-secondary'
-              )}
-              title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
-              {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </button>
+            <div className="flex gap-1">
+              {([
+                { value: 'light', icon: <Sun className="h-3.5 w-3.5" />, label: 'Light' },
+                { value: 'dark', icon: <Moon className="h-3.5 w-3.5" />, label: 'Dark' },
+                { value: 'system', icon: <Monitor className="h-3.5 w-3.5" />, label: 'System' },
+              ] as { value: Theme; icon: React.ReactNode; label: string }[]).map(({ value, icon, label }) => (
+                <button
+                  key={value}
+                  onClick={() => onThemeChange(value)}
+                  title={label}
+                  className={cn(
+                    'flex items-center gap-1.5 rounded-md border px-3 py-1 text-xs transition-colors',
+                    theme === value
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'hover:bg-secondary'
+                  )}
+                >
+                  {icon}
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Font size */}
@@ -89,7 +106,7 @@ export function SettingsDialog({
           </div>
 
           {/* Tagline */}
-          <div>
+          <div className="border-b pb-5">
             <p className="text-sm font-medium mb-1.5">Tagline</p>
             <p className="text-xs text-muted-foreground mb-2">
               Subtitle shown in the app header
@@ -109,6 +126,29 @@ export function SettingsDialog({
                 Reset to default
               </button>
             )}
+          </div>
+
+          {/* About */}
+          <div>
+            <p className="text-sm font-medium mb-2">About</p>
+            <div className="space-y-0.5 text-xs text-muted-foreground">
+              <div className="flex justify-between">
+                <span>Version</span>
+                <span className="font-mono">{appInfo?.version || 'x.x.x'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Platform</span>
+                <span className="font-mono">{appInfo?.platform || 'unknown'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Electron</span>
+                <span className="font-mono">{appInfo?.electronVersion || '-'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Node.js</span>
+                <span className="font-mono">{appInfo?.nodeVersion || '-'}</span>
+              </div>
+            </div>
           </div>
         </div>
 
