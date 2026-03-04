@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useTasks, useSearchTasks } from './hooks';
 import { BoardColumn } from './components/BoardColumn';
 import { TaskDialog } from './components/TaskDialog';
@@ -25,6 +25,34 @@ export default function App() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [linkingTask, setLinkingTask] = useState<Task | null>(null);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [splitRatio, setSplitRatio] = useState(0.5);
+  const isDragging = useRef(false);
+  const mainRef = useRef<HTMLElement>(null);
+
+  const handleDividerMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    isDragging.current = true;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+
+    const onMouseMove = (ev: MouseEvent) => {
+      if (!isDragging.current || !mainRef.current) return;
+      const rect = mainRef.current.getBoundingClientRect();
+      const ratio = (ev.clientX - rect.left) / rect.width;
+      setSplitRatio(Math.min(0.8, Math.max(0.2, ratio)));
+    };
+
+    const onMouseUp = () => {
+      isDragging.current = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  }, []);
 
   const { data: allTasks, isLoading } = useTasks();
   const { data: searchResults } = useSearchTasks(searchQuery);
@@ -71,7 +99,7 @@ export default function App() {
   return (
     <div className="flex h-screen flex-col">
       {/* Header */}
-      <header className="border-b bg-card px-4 py-3">
+      <header className="border-b bg-muted/60 px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <h1 className="text-lg font-bold text-foreground">Fast & Focus</h1>
@@ -134,22 +162,29 @@ export default function App() {
       </header>
 
       {/* Two-board layout */}
-      <main className="flex flex-1 overflow-hidden">
-        <BoardColumn
-          title="Today"
-          tasks={todayTasks}
-          filter={filter}
-          onEdit={handleEdit}
-          onLinkTask={handleLinkTask}
+      <main ref={mainRef} className="flex flex-1 overflow-hidden">
+        <div style={{ width: `${splitRatio * 100}%` }} className="flex overflow-hidden">
+          <BoardColumn
+            title="Today"
+            tasks={todayTasks}
+            filter={filter}
+            onEdit={handleEdit}
+            onLinkTask={handleLinkTask}
+          />
+        </div>
+        <div
+          className="w-1 bg-border hover:bg-primary/40 cursor-col-resize flex-shrink-0 transition-colors"
+          onMouseDown={handleDividerMouseDown}
         />
-        <div className="w-px bg-border" />
-        <BoardColumn
-          title="Backlog"
-          tasks={backlogTasks}
-          filter={filter}
-          onEdit={handleEdit}
-          onLinkTask={handleLinkTask}
-        />
+        <div style={{ width: `${(1 - splitRatio) * 100}%` }} className="flex overflow-hidden">
+          <BoardColumn
+            title="Backlog"
+            tasks={backlogTasks}
+            filter={filter}
+            onEdit={handleEdit}
+            onLinkTask={handleLinkTask}
+          />
+        </div>
       </main>
 
       {/* Dialogs */}
