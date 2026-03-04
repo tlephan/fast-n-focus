@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import { initDatabase, getDb } from './database';
 import { registerTaskHandlers } from './ipc/tasks';
 import { registerTaskLinkHandlers } from './ipc/taskLinks';
+import { registerDataHandlers } from './ipc/data';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -53,6 +54,7 @@ app.whenReady().then(() => {
 
   registerTaskHandlers();
   registerTaskLinkHandlers();
+  registerDataHandlers();
 
   // Open external URL in default browser
   ipcMain.handle('app:openExternal', (_event, url: string) => {

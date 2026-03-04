@@ -86,4 +86,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // App
   getAppInfo: () => ipcRenderer.invoke('app:getInfo'),
   openExternal: (url: string) => ipcRenderer.invoke('app:openExternal', url),
+
+  // Data
+  exportData: () => ipcRenderer.invoke('data:export'),
+  importData: () => ipcRenderer.invoke('data:import'),
 });

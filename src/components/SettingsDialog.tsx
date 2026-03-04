@@ -1,5 +1,7 @@
 import type React from 'react';
+import { useState } from 'react';
 import { Sun, Moon, Monitor } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { cn } from '../lib/utils';
 import { useAppInfo } from '../hooks';
 import api from '../api';
@@ -35,6 +37,31 @@ export function SettingsDialog({
   onExpirationDaysChange,
 }: SettingsDialogProps) {
   const { data: appInfo } = useAppInfo();
+  const queryClient = useQueryClient();
+  const [dataStatus, setDataStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  async function handleExport() {
+    setDataStatus(null);
+    try {
+      const result = await api.data.export();
+      if (result.success) setDataStatus({ type: 'success', message: 'Data exported successfully.' });
+    } catch {
+      setDataStatus({ type: 'error', message: 'Export failed.' });
+    }
+  }
+
+  async function handleImport() {
+    setDataStatus(null);
+    try {
+      const result = await api.data.import();
+      if (result.success) {
+        await queryClient.invalidateQueries();
+        setDataStatus({ type: 'success', message: `Imported ${result.taskCount} task(s).` });
+      }
+    } catch (err) {
+      setDataStatus({ type: 'error', message: err instanceof Error ? err.message : 'Import failed.' });
+    }
+  }
 
   if (!open) return null;
 
@@ -110,7 +137,7 @@ export function SettingsDialog({
             </div>
           </div>
 
-          {/* Tagline */}
+          {/* Tagline — disabled
           <div className="border-b pb-5">
             <p className="text-sm font-medium mb-1.5">Tagline</p>
             <p className="text-xs text-muted-foreground mb-2">
@@ -132,6 +159,7 @@ export function SettingsDialog({
               </button>
             )}
           </div>
+          */}
 
           {/* Expiration */}
           <div className="border-b pb-5">
@@ -152,6 +180,31 @@ export function SettingsDialog({
                 <span className="text-xs text-muted-foreground">days</span>
               </div>
             </div>
+          </div>
+
+          {/* Data */}
+          <div className="border-b pb-5">
+            <p className="text-sm font-medium mb-1">Data</p>
+            <p className="text-xs text-muted-foreground mb-3">Export or import all tasks and links as a JSON backup</p>
+            <div className="flex gap-2">
+              <button
+                onClick={handleExport}
+                className="rounded-md border px-3 py-1.5 text-xs hover:bg-secondary transition-colors"
+              >
+                Export
+              </button>
+              <button
+                onClick={handleImport}
+                className="rounded-md border border-destructive/50 px-3 py-1.5 text-xs text-destructive hover:bg-destructive/10 transition-colors"
+              >
+                Import (overwrites all data)
+              </button>
+            </div>
+            {dataStatus && (
+              <p className={cn('mt-2 text-xs', dataStatus.type === 'success' ? 'text-green-600 dark:text-green-400' : 'text-destructive')}>
+                {dataStatus.message}
+              </p>
+            )}
           </div>
 
           {/* About */}
