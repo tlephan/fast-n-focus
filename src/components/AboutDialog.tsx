@@ -26,12 +26,12 @@ export function AboutDialog({ open, onClose }: AboutDialogProps) {
 
         <div className="space-y-2 text-sm">
           <p className="text-muted-foreground italic">
-            "Get tasks done in under 2 weeks - Focus - No excuse"
+            Get tasks done in under 2 weeks - Focus - No excuse
           </p>
           <div className="mt-4 space-y-1">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Version:</span>
-              <span className="font-mono">{appInfo?.version || '1.0.0'}</span>
+              <span className="font-mono">{appInfo?.version || 'x.x.x'}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Platform:</span>
