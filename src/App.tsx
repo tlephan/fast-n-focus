@@ -1,11 +1,23 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import { useTasks, useSearchTasks } from './hooks';
+import { useTasks, useSearchTasks, useReorderTask, useUpdateTask } from './hooks';
 import { BoardColumn } from './components/BoardColumn';
 import { TaskDialog } from './components/TaskDialog';
 import { LinkTaskDialog } from './components/LinkTaskDialog';
 import { AboutDialog } from './components/AboutDialog';
-import { Search, Plus, Info, Sun, Moon } from 'lucide-react';
+import { Search, Plus, Info, Sun, Moon, GripVertical } from 'lucide-react';
 import type { Task } from './types';
+import {
+  DndContext,
+  DragOverlay,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragStartEvent,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 
 type FilterType = 'all' | 'pending' | 'done';
 
@@ -26,24 +38,33 @@ export default function App() {
   const [linkingTask, setLinkingTask] = useState<Task | null>(null);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [splitRatio, setSplitRatio] = useState(0.5);
-  const isDragging = useRef(false);
+  const [activeTask, setActiveTask] = useState<Task | null>(null);
+  const isDraggingDivider = useRef(false);
   const mainRef = useRef<HTMLElement>(null);
+
+  const reorderTask = useReorderTask();
+  const updateTask = useUpdateTask();
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
 
   const handleDividerMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
-    isDragging.current = true;
+    isDraggingDivider.current = true;
     document.body.style.cursor = 'col-resize';
     document.body.style.userSelect = 'none';
 
     const onMouseMove = (ev: MouseEvent) => {
-      if (!isDragging.current || !mainRef.current) return;
+      if (!isDraggingDivider.current || !mainRef.current) return;
       const rect = mainRef.current.getBoundingClientRect();
       const ratio = (ev.clientX - rect.left) / rect.width;
       setSplitRatio(Math.min(0.8, Math.max(0.2, ratio)));
     };
 
     const onMouseUp = () => {
-      isDragging.current = false;
+      isDraggingDivider.current = false;
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
       document.removeEventListener('mousemove', onMouseMove);
@@ -68,6 +89,88 @@ export default function App() {
     () => tasks.filter((t) => t.board === 'backlog').sort((a, b) => a.position - b.position),
     [tasks]
   );
+
+  const pendingTodayTasks = useMemo(() => todayTasks.filter((t) => !t.done), [todayTasks]);
+  const pendingBacklogTasks = useMemo(() => backlogTasks.filter((t) => !t.done), [backlogTasks]);
+
+  const handleDragStart = (event: DragStartEvent) => {
+    const task = event.active.data.current?.task as Task | undefined;
+    if (task) setActiveTask(task);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveTask(null);
+    if (!over) return;
+
+    const draggedTask = active.data.current?.task as Task | undefined;
+    if (!draggedTask) return;
+
+    // Determine target board
+    let targetBoardId: 'today' | 'backlog';
+    let overTaskId: string | null = null;
+
+    if (over.data.current?.boardId) {
+      // Dropped on board droppable zone
+      targetBoardId = over.data.current.boardId as 'today' | 'backlog';
+    } else if (over.data.current?.task) {
+      // Dropped on a specific task
+      targetBoardId = (over.data.current.task as Task).board;
+      overTaskId = over.id as string;
+    } else {
+      return;
+    }
+
+    const targetPendingTasks = targetBoardId === 'today' ? pendingTodayTasks : pendingBacklogTasks;
+
+    if (draggedTask.board === targetBoardId) {
+      // Same board: reorder
+      if (!overTaskId || active.id === over.id) return;
+
+      const activeIndex = targetPendingTasks.findIndex((t) => t.id === active.id);
+      const overIndex = targetPendingTasks.findIndex((t) => t.id === overTaskId);
+
+      if (activeIndex === -1 || overIndex === -1) return;
+
+      let newPosition: number;
+      if (overIndex === 0) {
+        newPosition = targetPendingTasks[0].position - 1;
+      } else if (overIndex === targetPendingTasks.length - 1) {
+        newPosition = targetPendingTasks[targetPendingTasks.length - 1].position + 1;
+      } else {
+        const before = targetPendingTasks[overIndex - 1].position;
+        const after = targetPendingTasks[overIndex].position;
+        newPosition = (before + after) / 2;
+      }
+
+      reorderTask.mutate({ id: active.id as string, position: newPosition });
+    } else {
+      // Cross-board move: update both board and position atomically
+      let newPosition: number;
+
+      if (targetPendingTasks.length === 0) {
+        newPosition = 1;
+      } else if (!overTaskId) {
+        // Dropped on board zone: append at end
+        newPosition = targetPendingTasks[targetPendingTasks.length - 1].position + 1;
+      } else {
+        // Dropped on a specific task: insert before it
+        const overIndex = targetPendingTasks.findIndex((t) => t.id === overTaskId);
+        if (overIndex === 0) {
+          newPosition = targetPendingTasks[0].position - 1;
+        } else {
+          const before = targetPendingTasks[overIndex - 1].position;
+          const after = targetPendingTasks[overIndex].position;
+          newPosition = (before + after) / 2;
+        }
+      }
+
+      updateTask.mutate({
+        id: active.id as string,
+        updates: { board: targetBoardId, position: newPosition },
+      });
+    }
+  };
 
   const handleEdit = (task: Task) => {
     setEditingTask(task);
@@ -162,30 +265,48 @@ export default function App() {
       </header>
 
       {/* Two-board layout */}
-      <main ref={mainRef} className="flex flex-1 overflow-hidden">
-        <div style={{ width: `${splitRatio * 100}%` }} className="flex overflow-hidden">
-          <BoardColumn
-            title="Today"
-            tasks={todayTasks}
-            filter={filter}
-            onEdit={handleEdit}
-            onLinkTask={handleLinkTask}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
+        <main ref={mainRef} className="flex flex-1 overflow-hidden">
+          <div style={{ width: `${splitRatio * 100}%` }} className="flex overflow-hidden">
+            <BoardColumn
+              title="Today"
+              boardId="today"
+              tasks={todayTasks}
+              filter={filter}
+              onEdit={handleEdit}
+              onLinkTask={handleLinkTask}
+            />
+          </div>
+          <div
+            className="w-1 bg-border hover:bg-primary/40 cursor-col-resize flex-shrink-0 transition-colors"
+            onMouseDown={handleDividerMouseDown}
           />
-        </div>
-        <div
-          className="w-1 bg-border hover:bg-primary/40 cursor-col-resize flex-shrink-0 transition-colors"
-          onMouseDown={handleDividerMouseDown}
-        />
-        <div style={{ width: `${(1 - splitRatio) * 100}%` }} className="flex overflow-hidden">
-          <BoardColumn
-            title="Backlog"
-            tasks={backlogTasks}
-            filter={filter}
-            onEdit={handleEdit}
-            onLinkTask={handleLinkTask}
-          />
-        </div>
-      </main>
+          <div style={{ width: `${(1 - splitRatio) * 100}%` }} className="flex overflow-hidden">
+            <BoardColumn
+              title="Backlog"
+              boardId="backlog"
+              tasks={backlogTasks}
+              filter={filter}
+              onEdit={handleEdit}
+              onLinkTask={handleLinkTask}
+            />
+          </div>
+        </main>
+
+        <DragOverlay>
+          {activeTask && (
+            <div className="flex items-center gap-2 rounded-lg border bg-card p-3 shadow-lg opacity-90 cursor-grabbing">
+              <GripVertical className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+              <span className="text-sm font-medium truncate">{activeTask.title}</span>
+            </div>
+          )}
+        </DragOverlay>
+      </DndContext>
 
       {/* Dialogs */}
       <TaskDialog

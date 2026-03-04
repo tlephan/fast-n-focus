@@ -3,35 +3,25 @@ import type { Task } from '../types';
 import { TaskCard } from './TaskCard';
 import { cn } from '../lib/utils';
 import { ChevronRight } from 'lucide-react';
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-} from '@dnd-kit/core';
+import { useDroppable } from '@dnd-kit/core';
 import {
   SortableContext,
-  sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { useReorderTask } from '../hooks';
 
 type FilterType = 'all' | 'pending' | 'done';
 
 interface BoardColumnProps {
   title: string;
+  boardId: string;
   tasks: Task[];
   filter: FilterType;
   onEdit: (task: Task) => void;
   onLinkTask: (task: Task) => void;
 }
 
-export function BoardColumn({ title, tasks, filter, onEdit, onLinkTask }: BoardColumnProps) {
+export function BoardColumn({ title, boardId, tasks, filter, onEdit, onLinkTask }: BoardColumnProps) {
   const [showCompleted, setShowCompleted] = useState(false);
-  const reorderTask = useReorderTask();
 
   const pendingTasks = tasks.filter((t) => !t.done);
   const completedTasks = tasks.filter((t) => t.done);
@@ -43,34 +33,10 @@ export function BoardColumn({ title, tasks, filter, onEdit, onLinkTask }: BoardC
         ? completedTasks
         : pendingTasks;
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
-  );
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (!over || active.id === over.id) return;
-
-    const activeIndex = visibleTasks.findIndex((t) => t.id === active.id);
-    const overIndex = visibleTasks.findIndex((t) => t.id === over.id);
-
-    if (activeIndex === -1 || overIndex === -1) return;
-
-    // Calculate new position
-    let newPosition: number;
-    if (overIndex === 0) {
-      newPosition = visibleTasks[0].position - 1;
-    } else if (overIndex === visibleTasks.length - 1) {
-      newPosition = visibleTasks[visibleTasks.length - 1].position + 1;
-    } else {
-      const before = visibleTasks[overIndex - 1].position;
-      const after = visibleTasks[overIndex].position;
-      newPosition = (before + after) / 2;
-    }
-
-    reorderTask.mutate({ id: active.id as string, position: newPosition });
-  };
+  const { setNodeRef, isOver } = useDroppable({
+    id: `board-${boardId}`,
+    data: { boardId },
+  });
 
   const totalCount = tasks.length;
   const doneCount = completedTasks.length;
@@ -85,26 +51,26 @@ export function BoardColumn({ title, tasks, filter, onEdit, onLinkTask }: BoardC
       </div>
 
       {/* Task List */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-2">
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
+      <div
+        ref={setNodeRef}
+        className={cn(
+          'flex-1 overflow-y-auto p-3 space-y-2 transition-colors',
+          isOver && 'bg-accent/20'
+        )}
+      >
+        <SortableContext
+          items={visibleTasks.map((t) => t.id)}
+          strategy={verticalListSortingStrategy}
         >
-          <SortableContext
-            items={visibleTasks.map((t) => t.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            {visibleTasks.map((task) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                onEdit={onEdit}
-                onLinkTask={onLinkTask}
-              />
-            ))}
-          </SortableContext>
-        </DndContext>
+          {visibleTasks.map((task) => (
+            <TaskCard
+              key={task.id}
+              task={task}
+              onEdit={onEdit}
+              onLinkTask={onLinkTask}
+            />
+          ))}
+        </SortableContext>
 
         {visibleTasks.length === 0 && (
           <p className="py-8 text-center text-sm text-muted-foreground">

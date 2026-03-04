@@ -1,7 +1,7 @@
 {
   "name": "fast-n-focus",
   "version": "0.1.0",
-  "description": "A fast, minimal task manager for macOS, Windows, and Web",
+  "description": "A fast, minimal task manager for macOS, Windows, and Linux",
   "type": "module",
   "main": "dist-electron/main.js",
   "scripts": {
@@ -18,8 +18,12 @@
     "electron",
     "react"
   ],
-  "author": "",
+  "author": "tlephan",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tlephan/fast-n-focus.git"
+  },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
     "@types/react": "^19.0.0",
