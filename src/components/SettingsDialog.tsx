@@ -17,6 +17,8 @@ interface SettingsDialogProps {
   onFontSizeChange: (value: FontSize) => void;
   tagline: string;
   onTaglineChange: (value: string) => void;
+  expirationDays: number;
+  onExpirationDaysChange: (value: number) => void;
 }
 
 export function SettingsDialog({
@@ -28,6 +30,8 @@ export function SettingsDialog({
   onFontSizeChange,
   tagline,
   onTaglineChange,
+  expirationDays,
+  onExpirationDaysChange,
 }: SettingsDialogProps) {
   const { data: appInfo } = useAppInfo();
 
@@ -126,6 +130,27 @@ export function SettingsDialog({
                 Reset to default
               </button>
             )}
+          </div>
+
+          {/* Expiration */}
+          <div className="border-b pb-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Auto-delete tasks</p>
+                <p className="text-xs text-muted-foreground">Delete tasks older than N days (0 = never)</p>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <input
+                  type="number"
+                  min={0}
+                  max={365}
+                  value={expirationDays}
+                  onChange={(e) => onExpirationDaysChange(Math.max(0, Number(e.target.value)))}
+                  className="w-16 rounded-md border bg-background px-2 py-1 text-center text-sm outline-none focus:ring-2 focus:ring-ring"
+                />
+                <span className="text-xs text-muted-foreground">days</span>
+              </div>
+            </div>
           </div>
 
           {/* About */}

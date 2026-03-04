@@ -14,6 +14,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   reorderTask: (id: string, newPosition: number) =>
     ipcRenderer.invoke('tasks:reorder', id, newPosition),
   searchTasks: (query: string) => ipcRenderer.invoke('tasks:search', query),
+  deleteOldTasks: (days: number) => ipcRenderer.invoke('tasks:deleteOlderThan', days),
 
   // Task Links
   getTaskLinks: (taskId: string) => ipcRenderer.invoke('taskLinks:get', taskId),

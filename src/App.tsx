@@ -1,5 +1,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useTasks, useSearchTasks, useReorderTask, useUpdateTask } from './hooks';
+import api from './api';
 import { BoardColumn } from './components/BoardColumn';
 import { TaskDialog } from './components/TaskDialog';
 import { LinkTaskDialog } from './components/LinkTaskDialog';
@@ -40,6 +42,10 @@ export default function App() {
     localStorage.getItem('tagline') ?? DEFAULT_TAGLINE
   );
 
+  const [expirationDays, setExpirationDays] = useState<number>(() =>
+    Number(localStorage.getItem('expiration-days') ?? 30)
+  );
+
   useEffect(() => {
     localStorage.setItem('theme', theme);
 
@@ -64,6 +70,15 @@ export default function App() {
     localStorage.setItem('tagline', tagline);
   }, [tagline]);
 
+  useEffect(() => {
+    localStorage.setItem('expiration-days', String(expirationDays));
+    if (expirationDays > 0) {
+      api.tasks.deleteOlderThan(expirationDays).then(({ deleted }: { deleted: number }) => {
+        if (deleted > 0) queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      });
+    }
+  }, [expirationDays]);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -74,6 +89,7 @@ export default function App() {
   const isDraggingDivider = useRef(false);
   const mainRef = useRef<HTMLElement>(null);
 
+  const queryClient = useQueryClient();
   const reorderTask = useReorderTask();
   const updateTask = useUpdateTask();
 
@@ -343,6 +359,8 @@ export default function App() {
         onFontSizeChange={setFontSize}
         tagline={tagline}
         onTaglineChange={setTagline}
+        expirationDays={expirationDays}
+        onExpirationDaysChange={setExpirationDays}
       />
     </div>
   );

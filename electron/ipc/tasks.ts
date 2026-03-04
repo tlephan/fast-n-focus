@@ -102,4 +102,13 @@ export function registerTaskHandlers() {
       .prepare('SELECT * FROM tasks WHERE title LIKE ? ORDER BY board, position ASC')
       .all(pattern);
   });
+
+  ipcMain.handle('tasks:deleteOlderThan', (_event, days: number) => {
+    const result = db
+      .prepare(
+        `DELETE FROM tasks WHERE created_at < datetime('now', ? || ' days')`
+      )
+      .run(`-${days}`);
+    return { deleted: result.changes };
+  });
 }

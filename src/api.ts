@@ -20,6 +20,7 @@ declare global {
       moveTask: (id: string, board: string) => Promise<Task>;
       reorderTask: (id: string, newPosition: number) => Promise<Task>;
       searchTasks: (query: string) => Promise<Task[]>;
+      deleteOldTasks: (days: number) => Promise<{ deleted: number }>;
       getTaskLinks: (taskId: string) => Promise<TaskLink[]>;
       createTaskLink: (link: CreateTaskLinkInput) => Promise<TaskLink>;
       deleteTaskLink: (id: string) => Promise<{ success: boolean }>;
@@ -44,6 +45,7 @@ const api = {
     move: (id: string, board: string) => eAPI().moveTask(id, board),
     reorder: (id: string, newPosition: number) => eAPI().reorderTask(id, newPosition),
     search: (query: string) => eAPI().searchTasks(query),
+    deleteOlderThan: (days: number) => eAPI().deleteOldTasks(days),
   },
   taskLinks: {
     get: (taskId: string) => eAPI().getTaskLinks(taskId),
