@@ -53,7 +53,7 @@ export function BoardColumn({ title, boardId, tasks, filter, onEdit, onLinkTask 
         </span>
         {boardId === 'today' && (
           <span className="ml-auto text-xs text-muted-foreground">
-            {new Date().toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+            {new Date().toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })} · Important Things
           </span>
         )}
       </div>
