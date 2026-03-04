@@ -23,22 +23,22 @@ export interface TaskLink {
 export interface CreateTaskInput {
   title: string;
   description?: string;
-  board: string;
-  priority: string;
+  board: 'today' | 'backlog';
+  priority: 'high' | 'medium' | 'low';
 }
 
 export interface UpdateTaskInput {
   title?: string;
   description?: string;
-  priority?: string;
-  board?: string;
+  priority?: 'high' | 'medium' | 'low';
+  board?: 'today' | 'backlog';
   position?: number;
 }
 
 export interface CreateTaskLinkInput {
   sourceTaskId: string;
   targetTaskId: string;
-  type: string;
+  type: 'related' | 'blocks' | 'blocked_by';
 }
 
 export interface AppInfo {
