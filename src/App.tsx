@@ -76,7 +76,7 @@ export default function App() {
           <div className="flex items-center gap-3">
             <h1 className="text-lg font-bold text-foreground">Fast & Focus</h1>
             <span className="hidden text-xs text-muted-foreground sm:inline">
-              "Get tasks done in under 2 weeks - Focus - No excuse"
+              Get today tasks done - Focus - No excuses
             </span>
           </div>
           <div className="flex items-center gap-2">

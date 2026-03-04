@@ -26,7 +26,7 @@ export function AboutDialog({ open, onClose }: AboutDialogProps) {
 
         <div className="space-y-2 text-sm">
           <p className="text-muted-foreground italic">
-            Get tasks done in under 2 weeks - Focus - No excuse
+            Get today tasks done - Focus - No excuses
           </p>
           <div className="mt-4 space-y-1">
             <div className="flex justify-between">
