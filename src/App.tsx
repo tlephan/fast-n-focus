@@ -6,7 +6,7 @@ import { BoardColumn } from './components/BoardColumn';
 import { TaskDialog } from './components/TaskDialog';
 import { LinkTaskDialog } from './components/LinkTaskDialog';
 import { SettingsDialog } from './components/SettingsDialog';
-import { Search, Plus, Settings, GripVertical } from 'lucide-react';
+import { Search, Plus, Settings, GripVertical, Zap } from 'lucide-react';
 import type { Task } from './types';
 import {
   DndContext,
@@ -61,7 +61,7 @@ export default function App() {
   }, [theme]);
 
   useEffect(() => {
-    const sizes: Record<FontSize, string> = { small: '14px', medium: '16px', large: '18px' };
+    const sizes: Record<FontSize, string> = { small: '15px', medium: '17px', large: '20px' };
     document.documentElement.style.fontSize = sizes[fontSize];
     localStorage.setItem('font-size', fontSize);
   }, [fontSize]);
@@ -247,7 +247,10 @@ export default function App() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <h1 className="text-lg font-bold text-foreground">Fast & Focus</h1>
-            <span className="hidden text-xs text-muted-foreground sm:inline">{tagline}</span>
+            <span className="hidden items-center gap-1.5 rounded-full bg-orange-500/15 px-3.5 py-1 text-xs font-medium text-orange-500 sm:inline-flex">
+              <Zap className="h-3 w-3 fill-orange-500" />
+              {tagline}
+            </span>
           </div>
           <div className="flex items-center gap-2">
             {/* Search */}
