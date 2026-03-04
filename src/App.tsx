@@ -4,7 +4,8 @@ import { BoardColumn } from './components/BoardColumn';
 import { TaskDialog } from './components/TaskDialog';
 import { LinkTaskDialog } from './components/LinkTaskDialog';
 import { AboutDialog } from './components/AboutDialog';
-import { Search, Plus, Info, Sun, Moon, GripVertical } from 'lucide-react';
+import { SettingsDialog } from './components/SettingsDialog';
+import { Search, Plus, Info, Settings, GripVertical } from 'lucide-react';
 import type { Task } from './types';
 import {
   DndContext,
@@ -20,23 +21,47 @@ import {
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 
 type FilterType = 'all' | 'pending' | 'done';
+type FontSize = 'small' | 'medium' | 'large';
+
+const DEFAULT_TAGLINE = 'Get today tasks done - Focus - No excuses';
 
 export default function App() {
   const [filter, setFilter] = useState<FilterType>('all');
+
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('theme');
     return saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
 
+  const [fontSize, setFontSize] = useState<FontSize>(() =>
+    (localStorage.getItem('font-size') as FontSize) || 'medium'
+  );
+
+  const [tagline, setTagline] = useState(() =>
+    localStorage.getItem('tagline') ?? DEFAULT_TAGLINE
+  );
+
   useEffect(() => {
     document.documentElement.classList.toggle('dark', darkMode);
     localStorage.setItem('theme', darkMode ? 'dark' : 'light');
   }, [darkMode]);
+
+  useEffect(() => {
+    const sizes: Record<FontSize, string> = { small: '14px', medium: '16px', large: '18px' };
+    document.documentElement.style.fontSize = sizes[fontSize];
+    localStorage.setItem('font-size', fontSize);
+  }, [fontSize]);
+
+  useEffect(() => {
+    localStorage.setItem('tagline', tagline);
+  }, [tagline]);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [linkingTask, setLinkingTask] = useState<Task | null>(null);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [splitRatio, setSplitRatio] = useState(0.5);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const isDraggingDivider = useRef(false);
@@ -106,15 +131,12 @@ export default function App() {
     const draggedTask = active.data.current?.task as Task | undefined;
     if (!draggedTask) return;
 
-    // Determine target board
     let targetBoardId: 'today' | 'backlog';
     let overTaskId: string | null = null;
 
     if (over.data.current?.boardId) {
-      // Dropped on board droppable zone
       targetBoardId = over.data.current.boardId as 'today' | 'backlog';
     } else if (over.data.current?.task) {
-      // Dropped on a specific task
       targetBoardId = (over.data.current.task as Task).board;
       overTaskId = over.id as string;
     } else {
@@ -124,7 +146,6 @@ export default function App() {
     const targetPendingTasks = targetBoardId === 'today' ? pendingTodayTasks : pendingBacklogTasks;
 
     if (draggedTask.board === targetBoardId) {
-      // Same board: reorder
       if (!overTaskId || active.id === over.id) return;
 
       const activeIndex = targetPendingTasks.findIndex((t) => t.id === active.id);
@@ -145,16 +166,13 @@ export default function App() {
 
       reorderTask.mutate({ id: active.id as string, position: newPosition });
     } else {
-      // Cross-board move: update both board and position atomically
       let newPosition: number;
 
       if (targetPendingTasks.length === 0) {
         newPosition = 1;
       } else if (!overTaskId) {
-        // Dropped on board zone: append at end
         newPosition = targetPendingTasks[targetPendingTasks.length - 1].position + 1;
       } else {
-        // Dropped on a specific task: insert before it
         const overIndex = targetPendingTasks.findIndex((t) => t.id === overTaskId);
         if (overIndex === 0) {
           newPosition = targetPendingTasks[0].position - 1;
@@ -206,9 +224,7 @@ export default function App() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <h1 className="text-lg font-bold text-foreground">Fast & Focus</h1>
-            <span className="hidden text-xs text-muted-foreground sm:inline">
-              Get today tasks done - Focus - No excuses
-            </span>
+            <span className="hidden text-xs text-muted-foreground sm:inline">{tagline}</span>
           </div>
           <div className="flex items-center gap-2">
             {/* Search */}
@@ -243,13 +259,13 @@ export default function App() {
               Add Task
             </button>
 
-            {/* Dark mode toggle */}
+            {/* Settings */}
             <button
-              onClick={() => setDarkMode((d) => !d)}
+              onClick={() => setSettingsOpen(true)}
               className="flex h-8 w-8 items-center justify-center rounded-md border hover:bg-secondary"
-              title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              title="Settings"
             >
-              {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              <Settings className="h-4 w-4" />
             </button>
 
             {/* About */}
@@ -320,6 +336,16 @@ export default function App() {
         sourceTask={linkingTask}
       />
       <AboutDialog open={aboutOpen} onClose={() => setAboutOpen(false)} />
+      <SettingsDialog
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        darkMode={darkMode}
+        onDarkModeChange={setDarkMode}
+        fontSize={fontSize}
+        onFontSizeChange={setFontSize}
+        tagline={tagline}
+        onTaglineChange={setTagline}
+      />
     </div>
   );
 }
