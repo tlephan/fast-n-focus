@@ -25,6 +25,7 @@ declare global {
       createTaskLink: (link: CreateTaskLinkInput) => Promise<TaskLink>;
       deleteTaskLink: (id: string) => Promise<{ success: boolean }>;
       getAppInfo: () => Promise<AppInfo>;
+      openExternal: (url: string) => Promise<void>;
     };
   }
 }
@@ -54,6 +55,7 @@ const api = {
   },
   app: {
     getInfo: () => eAPI().getAppInfo(),
+    openExternal: (url: string) => eAPI().openExternal(url),
   },
 };
 

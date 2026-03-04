@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { initDatabase, getDb } from './database';
@@ -48,6 +48,12 @@ app.whenReady().then(() => {
 
   registerTaskHandlers();
   registerTaskLinkHandlers();
+
+  // Open external URL in default browser
+  ipcMain.handle('app:openExternal', (_event, url: string) => {
+    const allowed = ['https://github.com/tlephan/fast-n-focus'];
+    if (allowed.includes(url)) shell.openExternal(url);
+  });
 
   // App info handler
   ipcMain.handle('app:getInfo', () => ({
