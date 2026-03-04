@@ -18,10 +18,10 @@ import {
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-const priorityConfig = {
-  high: { icon: '🔴', label: 'High' },
-  medium: { icon: '🟡', label: 'Medium' },
-  low: { icon: '🟢', label: 'Low' },
+const priorityBorder = {
+  high: 'border-l-red-500',
+  medium: 'border-l-yellow-400',
+  low: 'border-l-green-500',
 };
 
 interface TaskCardProps {
@@ -59,7 +59,8 @@ export function TaskCard({ task, onEdit, onLinkTask }: TaskCardProps) {
       ref={setNodeRef}
       style={style}
       className={cn(
-        'group flex items-start gap-2 rounded-lg border bg-card p-3 shadow-sm transition-colors',
+        'group flex items-start gap-2 rounded-lg border-y border-r bg-card p-3 shadow-sm transition-colors border-l-4',
+        priorityBorder[task.priority],
         isDragging && 'opacity-50',
         task.done && 'opacity-60'
       )}
@@ -104,7 +105,6 @@ export function TaskCard({ task, onEdit, onLinkTask }: TaskCardProps) {
       {/* Content */}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <span className="text-sm">{priorityConfig[task.priority].icon}</span>
           <span
             className={cn(
               'text-sm font-medium',
